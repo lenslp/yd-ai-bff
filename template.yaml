@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 1024
+    Runtime: nodejs20.x
+    Architectures: ['arm64']
+    Environment:
+      Variables:
+        NODE_OPTIONS: '--enable-source-maps'
+    EphemeralStorage:
+      Size: 512
+  Api:
+    OpenApiVersion: '2.0'
+    Cors:
+      AllowMethods: "'*'"
+      AllowHeaders: "'Content-Type,Authorization'"
+      AllowOrigin: "'*'"
+      MaxAge: 600
+
+Resources:
+  NodeModulesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nest-dependencies
+      Description: Node modules for Nest.js application
+      ContentUri: layer/
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Retain
+
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      BinaryMediaTypes:
+        - 'image/*'
+        - 'multipart/form-data'
+      Auth:
+        DefaultAuthorizer: NONE
+
+  KoaFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      SkipBuild: true
+    Properties:
+      Handler: lambda.handler
+      CodeUri: ./dist
+      MemorySize: 3008
+      Timeout: 30
+      Layers:
+        - !Ref NodeModulesLayer
+      Policies:
+        - VPCAccessPolicy: {}
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref Api
+            Auth:
+              Authorizer: NONE
+      AutoPublishAlias: live
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev'
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt KoaFunction.Arn

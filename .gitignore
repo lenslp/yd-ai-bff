@@ -1,0 +1,40 @@
+# Node / package managers
+node_modules/
+.pnp/
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# AWS SAM / Serverless
+.aws-sam/
+
+# Lambda layer dependencies
+layer/nodejs/node_modules/
+
+# Logs
+logs/
+*.log
+
+# Env files (keep samples if you add them later)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local backups / scratch
+backup/
+.claude/
+
+/generated/prisma
