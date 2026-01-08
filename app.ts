@@ -13,6 +13,7 @@ import ErrorHandler from '@middlewares/ErrorHandler';
 import { asValue, createContainer, Lifetime } from 'awilix';
 import { loadControllers, scopePerRequest } from 'awilix-koa';
 import Koa from 'koa';
+import bodyParser from 'koa-bodyparser';
 import serve from 'koa-static';
 import historyApiFallback from 'koa2-connect-history-api-fallback';
 import { configure, getLogger } from 'log4js';
@@ -27,6 +28,8 @@ configure({
 const { port, viewDir, memoryFlag, staticDir } = config;
 //静态资源生效节点
 app.use(serve(staticDir));
+//body 解析
+app.use(bodyParser());
 //创建容器
 const container = createContainer();
 
@@ -61,10 +64,8 @@ const logger = getLogger('cheese');
 ErrorHandler.error(app, logger);
 //把所有的路由全部load进来
 app.use(loadControllers(`${__dirname}/routers/*{.ts,.js}`));
-if (process.env.NODE_ENV !== 'development') {
-  //ECS EC2 本地运行listen
-  app.listen(port || 3000, () => {
-    console.log(`Server is running`);
-  });
-}
+//本地开发/ECS EC2 运行时listen
+app.listen(port || 3000, () => {
+  console.log(`Server is running on port ${port || 3000}`);
+});
 export default app;
