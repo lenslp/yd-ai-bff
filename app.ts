@@ -44,7 +44,7 @@ container.loadModules([`${__dirname}/services/*{.ts,.js}`], {
   resolverOptions: {
     // 1.每次都new
     // 2.单例模式0的
-    lifetime: Lifetime.SCOPED,
+    lifetime: Lifetime.SCOPED, // 每次请求创建一个新的实例
   },
 });
 
