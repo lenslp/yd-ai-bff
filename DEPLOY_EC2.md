@@ -203,7 +203,7 @@ sudo systemctl restart postgresql
 
 ```bash
 cd /home/ec2-user
-git clone https://github.com/your-username/yd-ai-bff.git
+git clone https://github.com/lenslp/yd-ai-bff.git
 cd yd-ai-bff
 ```
 

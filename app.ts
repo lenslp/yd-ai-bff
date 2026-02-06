@@ -20,20 +20,37 @@ import { configure, getLogger } from 'log4js';
 import { createPrismaClient } from './services/prisma.service';
 
 const app = new Koa();
-//日志系统
-configure({
-  appenders: { cheese: { type: 'file', filename: `${__dirname}/logs/yd.log` } },
-  categories: { default: { appenders: ['cheese'], level: 'error' } },
-});
+//日志系统 - Lambda 兼容配置
+const isLambda = process.env.LAMBDA_TASK_ROOT !== undefined;
+
+if (isLambda) {
+  // Lambda 环境：只使用控制台输出
+  configure({
+    appenders: {
+      console: {
+        type: 'console',
+        layout: { type: 'pattern', pattern: '%d %p %m' },
+      },
+    },
+    categories: { default: { appenders: ['console'], level: 'info' } },
+  });
+} else {
+  // 本地/EC2 环境：使用文件日志
+  configure({
+    appenders: { cheese: { type: 'file', filename: `${__dirname}/logs/yd.log` } },
+    categories: { default: { appenders: ['cheese'], level: 'error' } },
+  });
+}
 const { port, viewDir, memoryFlag, staticDir } = config;
 //静态资源生效节点
 app.use(serve(staticDir));
-//body 解析
+//自动解析 HTTP 请求体 (Request Body)，将结果直接挂载到 Koa 上下文对象的 ctx.request.body 属性上
 app.use(bodyParser());
 //创建容器
 const container = createContainer();
 
 //注册 Prisma Client 到容器
+//在 Awilix（依赖注入容器）中，asValue 的作用是将一个“现成的值”或“已经创建好的实例”直接注册到容器中
 container.register({
   prismaClient: asValue(createPrismaClient()),
 });

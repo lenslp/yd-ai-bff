@@ -18,7 +18,10 @@ cp -r views dist/views
 echo "🎨 复制 assets 目录到 dist..."
 cp -r assets dist/assets
 
-# 4. 复制 package.json 到layer层
+# 4. 复制 Prisma generated 目录
+cp -r generated dist/
+
+# 5. 复制 package.json 到layer层
 echo "📦 复制 package.json 到layer层..."
 cp package.json layer/nodejs
 
